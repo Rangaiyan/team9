@@ -15,8 +15,37 @@ def execute_code():
     if language == 'python':
         result = execute_python_code(code)
         return jsonify({'result': result})
-    
-    return jsonify({'result': 'Unsupported language'})
+    elif language == 'java':
+        result = execute_java_code(code)
+        return jsonify({'result': result})
+    else:
+        return jsonify({'result': 'Unsupported language'})
+
+def execute_java_code(code):
+    try:
+        with open('temp.java', 'w') as file:
+            file.write(code)
+        
+        compile_output = subprocess.check_output(['javac', 'temp.java'], stderr=subprocess.STDOUT, text=True)
+        
+        if compile_output:
+            return compile_output
+            
+        run_output = subprocess.check_output(['java', '-cp', '.', 'temp'], stderr=subprocess.STDOUT, text=True)
+        return run_output
+    except subprocess.CalledProcessError as e:
+        return e.output
+    finally:
+        os.remove('temp.java')
+        if os.path.exists('temp.class'):
+            os.remove('temp.class')
+
+
+
+
+
+
+
 
 def execute_python_code(code):
     try:
